@@ -1,0 +1,29 @@
+  Checking available tablespace 
+-> SQL > select tablespace_name, contents, status from dba_tablespaces;
+  Check the Size 
+-> SQL > select tablespace_name, file_name, bytes/1024/1024 from dba_data_files;
+    See some parameter related to UNDO 
+-> show parameter undo;
+    AUTO -> automatically manage 
+    900 is number of second for which UNDO data is retain 
+    
+    Add more datafile to undo tablespace ( better to have more datafile to avoide contention occur )
+-> alter tablespace undotbs1 add datafile '/disk1/dev/data/undotbs1b.dbf' size 10m autoextend on next 1m maxsize unlimited;
+     check again, if it is added or not
+-> SQL > select tablespace_name, file_name, bytes/1024/1024 from dba_data_files order by tablespace_name;
+      How to create UNDO Tablespace 
+-> create undo tablespace undotbs2 datafile '/disk1/dev/data/undotbs2_01.tbf' size 5m reuse autoextend on;
+      Check again tablespace 
+-> SQL > select tablespace_name, contents, status from dba_tablespaces;
+     See which one is active 
+-> SQL > show parameter undo; 
+     Change active table space to undotbs2;
+-> SQL > alter system set undo_tablespace=undotbs2;
+    check parameter again
+-> SQL > show parameter undo; 
+    Find all the segaments related to UNDO tablespaces; and check "ONLINE", only one can be online
+-> SQL > select segment_name, owner, tablespace_name, status from dba_rollback_segs;
+     change default UNDO tablespace to undotbs1;
+-> SQL > alter system set undo_tablespace=undotbs1;
+        Check which one is ONLINE
+-> SQL > select segment_name, owner, tablespace_name, status from dba_rollback_segs;
