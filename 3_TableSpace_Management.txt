@@ -1,16 +1,17 @@
 -> su - oracle
 -> cd /disk2/
 -> vi test1.sql
-    drop table student;
-    create table student(sno number, sname varchar2(100)) tablespace tbs1;
-    begin
-    for i in 1..10000
-    loop
-    insert into student values (1,'John aaaaaaaaaa');
-    end loop;
-    commit;
-    end;
-    /
+drop table players;
+create table players(pno number, pname varchar2(100)) tablespace tbs1;
+begin
+for i in 1..10000
+loop
+insert into players values (1,'John Doe');
+end loop;
+commit;
+end;
+/
+
 
 -> sqlplus / as sysdba 
     see what ware the various tablespaces and datafiles present in Oracel database 
