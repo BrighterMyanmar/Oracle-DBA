@@ -1,0 +1,9 @@
+    checking db_block_size parameter 
+-> SQL > show parameter db_block_size;
+-> SQL > create tablespace tbs3 datafile '/disk2/prod1/data/data03.dbf' size 10m blocksize 16k;
+    Error
+    configure the blocksize 16k
+    scope=both will effect current instance and it will update in pfile 
+-> SQL > alter system set db_16k_cache_size=60m scope=both;
+    rerun the tablespace creating script with bigger size
+-> SQL > create tablespace tbs3 datafile '/disk2/prod1/data/data03.dbf' size 10m blocksize 16k;

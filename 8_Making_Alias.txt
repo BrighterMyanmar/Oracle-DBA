@@ -1,0 +1,4 @@
+with no su user 
+ -> vi .bashrc 
+ -> alias dbca="/u01/app/oracle/product/19.0.0/bin/dbca"
+ -> alias sqlplus="/u01/app/oracle/product/19.0.0/bin/sqlplus"

@@ -1,0 +1,86 @@
+=> Creating Folder Structure for Database 
+    Login as Oracle user
+    -> cd disk1
+    -> mkdir prod
+    -> cd Prod
+    -> mkdir data redo control log arch diag fra (dia => diagnostic relative files, fra fast recovery area )
+    -> cd $ORACLE_HOME/dbs
+    -> ls -lrt  ( this is where we will create parameter file )
+
+We will be creating our parameter file $ORACLE_HOME/dbs folder .
+When oracle database start, it read database initialization parameter from parameter file.
+this parameter file is created by DBA and define orveall instance initialization
+memory_target is most important parameter, it provide the total memory size of PGA & SGA 
+Oracle automatically manage the spaces for different Memory Architecture based on memory_target parameter
+create initprod.ora file inside $ORACLE_HOME/dbs 
+
+    -> vi initprod.ora
+        db_name=prod
+        memory_target=500m
+        control_files='/disk1/prod/control/control01.ctl' , '/disk1/prod/control/control02.ctl'
+        diagnostic_dest='/disk1/product/diag'
+        compatible=19.5.0
+    -> esc -> :wq! 
+
+Create SQL script for Database Creating inside $ORACLE_HOME/dbs 
+    -> vi dbcreation.sql 
+       create database prod 
+       datafile '/disk1/prod/data/system.dbf' size 300m autoextend on 
+       sysaux datafile '/disk1/prod/data/sysaux.dbf' size 300m autoextend on 
+       default tablespace user_data datafile '/disk1/prod/data/user01.dbf' size 500m
+       undo tablespace undotbs datafile '/disk1/prod/data/undotbs.dbf' size 100m 
+       logfile group1 '/disk1/prod/redo/redo1.rdo' size 100m,
+               group2 '/disk1/prod/redo/redo2.rdo' size 100m;
+    -> esc -> :wq!
+    -> export $ORACLE_SID=prod
+    -> sqlplus / as sysdba (/u01/app/oracle/product/19.0.0/bin/sqlplus / as sysdba)
+    -> SQL > startup nomount 
+    -> SQL > @//u01/app/oracle/product/19.0.0/dbs/dbcreation.sql
+
+    -> SQL > @$ORACLE_HOME/rdbms/admin/catalog.sql
+    -> SQL > @$ORACLE_HOME/rdbms/admin/catproc.sql
+    -> SQL > @$ORACLE_HOME/sqlplus/admin/pupbld.sql
+
+    -> SQL > shut immediate
+    -> SQL > exit 
+
+Inside $ORACLE_HOME/dbs 
+    -> export ORACLE_SID=prod
+    -> sqlplus / as sysdba 
+    -> SQL > startup
+    -> SQL > select name from v$database;
+    -> SQL > select name from v$controlfile;
+    -> SQL > select name from v$datafile;
+    -> SQL > select * from dual;
+    -> SQL > select sysdate from dual;
+    -> SQL > exit
+
+Go to disk1 and check folder structure 
+    -> cd /disk1 
+    -> cd prod 
+    -> cd data 
+    -> ls 
+
+Creating Database Using dbca tool 
+    -> xhost + 
+    -> new terminal
+    -> login as oracle user 
+    -> cd /disk3 
+    -> mkdir prod1 
+    -> cd prod1
+    -> mkdir arch control data diag fra log
+    -> dbca ( Create Database )
+    -> export ORACLE_SID=dev
+    -> sqlplus / as sysdba 
+    -> SQL > startup
+    -> SQL > select name from v$database;
+    -> SQL > select name from v$controlfile;
+    -> SQL > select name from v$datafile;
+    -> SQL > select * from dual;
+    -> SQL > select sysdate from dual;
+    -> SQL > shut immediate
+    -> SQL > exit
+        check ORACLE_SID
+    -> echo $ORACLE_SID
+        restart database 
+    -> SQL > startup

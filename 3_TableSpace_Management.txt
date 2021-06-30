@@ -1,0 +1,99 @@
+-> su - oracle
+-> cd /disk2/
+-> vi test1.sql
+    drop table student;
+    create table student(sno number, sname varchar2(100)) tablespace tbs1;
+    begin
+    for i in 1..10000
+    loop
+    insert into student values (1,'John aaaaaaaaaa');
+    end loop;
+    commit;
+    end;
+    /
+
+-> sqlplus / as sysdba 
+    see what ware the various tablespaces and datafiles present in Oracel database 
+    one of the important data dictionary table is dba_data_files
+    see what are the columns in data dictionary table
+-> SQL > desc dba_data_files;
+    see tablespace_name, coorespandent file name and allocated bytes 
+-> SQL > select tablespace_name, file_name, bytes from dba_data_files;
+-> SQL > SET LINESIZE 150
+-> SQL > COLUMN TABLESPACE_NAME FORMAT A30
+-> SQL > COLUMN FILE_NAME FORMAT A50
+-> SQL > select tablespace_name, file_name, bytes/1024/1024 from dba_data_files;
+    Create a Tablespace 
+-> SQL > create tablespace tbsl datafile '/disk2/prod1/data/data01.dbf' size 1M 
+    See all tablespaces again
+-> SQL > select tablespace_name, file_name, bytes/1024/1024 from dba_data_files;
+    To test tbs1 , create table and store data in it 
+    create sql file to create a table
+-> SQL > @/disk2/test1.sql
+    Check remaining space on tbs1 
+-> SQL > select tablespace_name, bytes from dba_free_space where tablespace_name='TBS1';
+    change test1.sql loop amount to 1 lakh and test run again to check error 
+    the following execution will generate error
+-> SQL > @/disk2/test1.sql
+    We have three options to Solve this provlem 
+    1. To increse the size of the datafile 
+    2. Add one more datafile to tablespace 
+    3. use autoextend on option 
+
+    Using First option, to increse the size of the datafile 
+
+-> SQL > alter database datafile '/disk2/prod1/data/data01.dbf' resize 10m;
+    run the script again 
+-> SQL > @/disk2/test1.sql
+
+    Using Second option , Add one more datafile to tablespace 
+    
+-> SQL > alter tablespace tbs1 add datafile '/disk1/prod1/data/data02.dbf' size 20m;
+
+    Check datafiles inside tbs1 tablespace 
+
+-> SQL > select tablespace_name, file_name, bytes from dba_data_files;
+    Using Third option , use autoextend on
+    before using autoextend on option, drop tablespace with it contents and datafiles 
+
+-> SQL > drop tablespace tbs1 including contents and datafiles;
+    check tablespace again 
+ -> SQL > select tablespace_name, file_name, bytes from dba_data_files;
+    recreate tablesspace 
+
+-> SQL > create tablespace tbs1 datafile '/disk2/prod/data/data01.dbf' size 1m autoextend on;
+    check size of datafile 
+-> SQL > select tablespace_name, file_name, bytes/1024/1024 from dba_data_files;
+    reinsert 100000 rows 
+-> SQL > @/disk2/test1.sql
+    check size of datafile 
+-> SQL > create tablespace tbs1 datafile '/disk2/prod/data/data01.dbf' size 1m autoextend on;
+    drop tablespace for more option test 
+-> SQL > drop tablespace tbs1 including contents and datafiles;
+       recreate tablesspace 
+-> SQL > create tablespace tbs1 datafile '/disk2/prod/data/data01.dbf' size 1m autoextend on next 512k      maxsize 250m;
+
+    Rename tablespace 
+-> SQL > alter tablespace tbs1 rename to tbs1
+    check 
+-> SQL > select tablespace_name, file_name, bytes/1024/1024 from dba_data_files;
+    add one more datafile 
+-> SQL > alter tablespace tbs1 add datafile '/disk2/prod/data/data02.dbf' size 20m;
+    remove 1 datafile from tablespace 
+-> SQL > alter tablespace tbs2 drop datafile '/disk2/prod/data/data02.dbf';
+    check 
+-> SQL > select tablespace_name, file_name, bytes/1024/1024 from dba_data_files;
+    rename datafile 
+    to rename datafile we have to put tablespace on offline mode
+    put tablespace offline
+-> SQL > alter tablespace tbs2 offline;
+    rename datafile 
+    rename datafile inside data folder 
+-> cd /disk2/prod1/data 
+-> mv data01.dbf data88.dbf 
+    rename datafile 
+-> SQL > alter database rename file '/disk2/prod/data/data1.dbf' to '/disk2/prod/data/data88.dbf';
+    check 
+-> SQL > select tablespace_name, file_name, bytes/1024/1024 from dba_data_files;
+    put tablespace back to online 
+-> SQL > alter tablespace tbs2 online;

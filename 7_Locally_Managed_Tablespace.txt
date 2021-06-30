@@ -1,0 +1,9 @@
+    Let see what kind of the table management is used when we create previous tablespaces 
+-> SQL > select tablespace_name, extent_management from dba_tablespaces;
+    create dicationary managed tablespace 
+-> SQL > create tablesapce tbs3 datafile '/disk1/prod/data/data05.dbf' size 10m extent management dicationary default storage (inittial 50k next 50k minextents 2 maxextents 50 pctincrease 0);
+    check again 
+-> SQL > select tablespace_name, extent_management from dba_tablespaces;
+    Error 
+    Because whenever SYSTEM tablespace is using LOCAL management we can't create any dicationary management tablespace 
+-> 

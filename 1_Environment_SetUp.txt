@@ -1,0 +1,116 @@
+Oracle Installation on Rat Hat Enterprise Linux over VMWare Play Station
+
+
+=> Download Software 
+   -> VMWare 
+https://www.vmware.com/products/workstation-player/workstation-player-evaluation.html
+   -> Red Hat Enterprise Linux
+https://developers.redhat.com/products/rhel/download
+   -> Oracle Database 19c
+https://www.oracle.com/sg/database/technologies/oracle-database-software-downloads.html
+
+
+=> Install VMWare
+=> Create Virtual Machine (.iso) 
+=> Play 
+   -> install 
+
+
+=> System Partition
+    => Auto Gen ( Change Size )
+  1. / 20 GiB xfs LVM(Device Type) rhel(group
+  2. /home 25 GiB xfs LVM rhel
+  3. swap 2.03 GiB swap LVM rhel
+  4. /boot 1 GiB ext4 Standard
+
+
+    => Create other System Partitions
+  5. /var 20 GiB ext4
+  6. /usr 15 GiB ext4
+  7. /opt 30 GiB ext4
+  8. /tmp 16 GiB ext4
+  
+     => Custom Partitions
+  9. /u01 16 GiB ext4
+  10. /disk1 24 GiB ext4
+  11. /disk2 24 GiB ext4
+
+=> Subscribe to Rat Hat
+     -> subscription-manager register
+
+
+=> Software Installation 
+     -> yum install libnsl
+     -> $which gcc
+     -> $which make
+
+
+=> Check oracle user and oinstall group exist
+     -> getent passwd oracle 
+     -> getent group oinstall
+
+
+=> Create oracle user and oinstall group
+     -> su - root
+     -> groupadd dba
+     -> groupadd oinstall
+     -> useradd -m -g oinstall -G dba oracle
+     -> passwd oracle
+
+
+=> change owner of some dirs ( have to be in root user session )
+     -> df -h
+     -> chown -R  oracle:oinstall /u01
+     -> chown -R  oracle:oinstall /disk1
+     -> chown -R  oracle:oinstall /disk2
+     -> chown -R  oracle:oinstall /disk3
+     -> chown -R  oracle:oinstall /opt 
+     -> chmod -R 751 /u01
+
+
+=> change root user oracle user
+     -> su - oracle
+     -> vi .bash_profile ( press i -> insert )
+export ORACLE_SID=prod
+export ORACLE_BASE=/u01/app/oracle
+export ORACLE_HOME=/u01/app/oracle/product/19.0.0
+export PATH=$_ORACLE_HOME/bin:$PATH
+     ->  esp => :wq!
+     -> . .bash_profile
+     -> echo $ORACLE_BASE 
+     -> echo $ORACLE_SID 
+     -> echo $ORACLE_HOME
+
+
+=> Create ORACLE_HOME folder structure
+     -> cd /u01 
+     -> mkdir app 
+     -> cd app 
+     -> mkdir oracle
+     -> cd oracle 
+     -> mkdir product 
+     -> cd product 
+     -> mkdir 19.0.0
+
+
+=>  Make Shared Folder
+     -> cd /mnt/hgfs -> 
+     -> cd Softwares
+     -> unzip LINUX.X64_193000_db_home.zip -d /u01/app/oracle/product/19.0.0/
+
+
+=> Change Login user to oracle
+     -> service gdm restart
+
+
+=> Run xhost + for GUI ( seperate terminal )
+=> Export Display and Rat Hat version 
+     -> export DISPLAY=:0
+     -> export CV_ASSUME_DISTID=OEL8.1
+=> Install Oracle Database 
+     -> cd /u01/app/oracle/proudct/19.0.0
+     -> sh runInstaller (  ./runInstaller)
+
+
+=> => Run dbca
+/u01/app/oracle/product/19.0.0/bin/dbca

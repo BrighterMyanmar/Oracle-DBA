@@ -1,0 +1,19 @@
+    checking dba_tablespace_groups;
+-> SQL > select * from dba_tablespace_groups;
+    create temporary tablespace with group 
+-> SQL > create temporary tablespace temp2 tempfile '/disk2/prod1/data/temp01.dbf' size 10m tablespace group te_group;
+    check again
+-> SQL > select * from dba_tablespace_groups;
+    check available temproary tablespace 
+-> SQL > select tablespace_name, filename from dba_temp_files;
+    adding already existing temporary file to group 
+-> SQL > alter tablespace temp1 tablesapce group te_group;
+-> SQL > alter tablespace temp2 tablesapce group te_group;
+    check again
+-> SQL > select * from dba_tablespace_groups;
+    checking default temporary tablespace
+-> SQL > select * from database_properties where property_name = "%TABLESPACE%";
+    Assign te_group as default temporary space 
+-> SQL > alter database default temporary tablespace_name te_group;
+    checking default temporary tablespace
+-> SQL > select * from database_properties where property_name = "%TABLESPACE%"

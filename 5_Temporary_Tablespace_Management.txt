@@ -1,0 +1,22 @@
+    Temporary Tablespace are used to manage space for database sorting, 
+    also they are use to store global temporary data.
+    When you join two large table, and oracle database can't find enough space 
+    in memory or in ram, oracle allocate in this temporary table 
+
+    see temporary tablespace available in oracel database 
+-> SQL > desc dba_data_files;
+-> SQL > select tablespace_name, file_name, bytes/1024/1024 from dba_data_files;
+    increse temporary tablespace size to 30
+-> SQL > alter database tempfile '/disk2/prod/data/temp01.dbf' resize 30m;
+    check again
+-> SQL > select tablespace_name, file_name, bytes/1024/1024 from dba_data_files;
+    create one more temporary tablespace 
+-> SQL > create temporary tablespace temp1 tempfile '/disk2/prod1/data/temp02.dbf' size 10m;
+    check again
+-> SQL > select tablespace_name, file_name, bytes/1024/1024 from dba_data_files;
+    See which one is default temporary tablespace 
+-> SQL > select * from database_properties where property_name like '%TABLESPACE%';
+    Changing default temporary table space 
+-> SQL > alter database default temporary tablespace temp1;
+    check again
+-> SQL > select * from database_properties where property_name like '%TABLESPACE%';
