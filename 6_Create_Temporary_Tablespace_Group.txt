@@ -14,6 +14,6 @@
     checking default temporary tablespace
 -> SQL > select * from database_properties where property_name = "%TABLESPACE%";
     Assign te_group as default temporary space 
--> SQL > alter database default temporary tablespace_name te_group;
+-> SQL > alter database default temporary tablespace te_group;
     checking default temporary tablespace
 -> SQL > select * from database_properties where property_name = "%TABLESPACE%"
