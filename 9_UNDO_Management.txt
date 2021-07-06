@@ -27,3 +27,78 @@
 -> SQL > alter system set undo_tablespace=undotbs1;
         Check which one is ONLINE
 -> SQL > select segment_name, owner, tablespace_name, status from dba_rollback_segs;
+
+**************** Managing Undo Retention *******************************
+    Check UNDO retention values;
+-> SQL > show parameter undo;
+    Changing UNDO retention period 
+-> SQL > alter system set undo_retention = 2400;
+    Check UNDO retention values again;
+-> SQL > show parameter undo;
+    We can also set UNDO_RETENTION paramter on Paramter file
+    Checking UNDO_TABLESPACE is Gurantee or no Gurantee
+-> SQL > select tablespace_name,retention from dba_tablespaces;
+    Check Active UNDO_TABLESPACE 
+-> SQL > show parameter undo;
+    Change Retention Policy to undotbs1 to GURANTEE 
+-> SQL > alter tablespace undotbs1 retention guarantee;
+    Recheck Retention Policy 
+-> SQL > select tablespace_name,retention from dba_tablespaces;
+    Change back to no guarantee;
+-> SQL > alter tablespace undotbs1 retention noguarantee;
+    Recheck Retention Policy 
+-> SQL > select tablespace_name,retention from dba_tablespaces;
+
+
+**************** Redo Log File Management *******************************
+    DBA don't have to do Redo Log Management, but it is important to know
+    what are the various files/groups in the system.
+    check log files 
+-> SQL > select * from v$logfile;
+    check log files including size 
+-> SQL > select * from v$log;
+    check with MB size 
+-> SQL > select group#, bytes/1024/1024, status from v$log;
+    It is better to have at least 2 file in a group. 
+    So add more to each group. 
+-> SQL > alter database add logfile meember '/disk2/db1/log/redo01b.log' to group 1;
+-> SQL > alter database add logfile meember '/disk2/db1/log/redo02b.log' to group 2;
+-> SQL > alter database add logfile meember '/disk2/db1/log/redo03b.log' to group 3;
+    check log files again 
+-> SQL > select * from v$logfile;
+    check INVALID statud to VALID  ( three times )
+-> SQL > alter system switch logfile;
+-> SQL > alter system switch logfile;
+-> SQL > alter system switch logfile;
+    check log files again 
+-> SQL > select * from v$logfile;
+    Delete 1 group 
+    desired group to delete must be inactive status
+    check INACTIVE group
+-> SQL > select * from v$log;
+    Delete group 3
+-> SQL > alter database drop logfile group 3;
+    check again 
+-> SQL > select * from v$logfile;
+    Add Group file 
+-> SQL > alter database add logfile group 3 ('/disk2/db1/log/redo3a.log','/disk2/db1/log/redo3b.log','/disk2/db1/log/redo3c.log') size 10m;
+    check again 
+-> SQL > select * from v$logfile;
+    check order by group 
+-> SQL > select * from v$logfile order by group#;
+
+**************** Archive Management *******************************
+    check database is in Archive mode or not
+-> SQL > archive log list;
+    Put database in Archive mode 
+    To change to Archive mode we have to run the database in mount mode 
+    So shut down ( shutdown immediate ) current database and restart using 
+-> SQL > startup mount;
+    Change database to Archive log mode 
+-> SQL > alter database archivelog;
+    set the location of the archive destination 
+-> SQL > alter system set log_archive_dest_1 = 'LOCATION=/disk2/db1/arch/' scope=both;
+    Open the database from mount state to open 
+-> SQL > alter database open;
+    Check Database is in archive mode or not again 
+-> SQL > archive log list;

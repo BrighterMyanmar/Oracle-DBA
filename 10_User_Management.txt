@@ -1,0 +1,47 @@
+    See all Available Users 
+-> SQL > select username, account_status from dba_users;
+    Clear the screen 
+-> SQL > clear src 
+    Create a User 
+-> SQL > create user john identified by john123;
+    Open new terminal for new session
+    login to SQL using john/john123 
+-> SQL > sqlplus / as sysdba 
+-> SQL > conn john/john123 
+    User login deny cause lack of Previlage 
+    Back to main Terminal to give John previlage 
+-> SQL > grant create session to john;
+    Retry with other Terminal 
+-> SQL > conn john/john123 
+    As user john find his tablespace objects 
+-> SQL > select * from tab;
+    From Main Terminal 
+    Check available tablespaces for user John 
+-> SQL > select default tablespace, temporary_tablespace from dba_users where useame='JOHN';
+    We will change default tablespace for jhon
+    See available tablespaces 
+-> SQL > select tablespace_name, status from dba_tablespaces;
+    Allocate one of the tablespace to John's default tablespace 
+-> SQL > alter user john default tablespace tbs4;
+    Recheck John's default tablespace 
+-> SQL > select default tablespace, temporary_tablespace from dba_users where useame='JOHN';
+    Limit how much tablespace amount jhon can store 
+    alter john usable tablespace amount to 5m;
+-> SQL > alter user john quota 5m on tbs4;
+    check which user have how much amount of usable tablespace
+-> SQL > select username, tablespace_name, bytes, max_bytes from dba_ts_quotas;
+    Create new User with different name 
+-> SQL > create user tom identified by tom123 password expire;
+    Grant create session to tom 
+-> SQL > grant create session to tom;
+    Check login with tome account on other terminal
+    Drop a user with his data;
+-> SQL > drop user tom cascade;
+    Reset user password 
+-> SQL > alter user john identified by john567 password expire;
+    test conn sql using john/john123 on other terminal 
+    lock user john
+-> SQL > alter user john account lock;
+    unlock user john 
+-> SQL > alter user john account unlock;
+
