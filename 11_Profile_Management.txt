@@ -1,0 +1,26 @@
+    see john's profile ( SYS session )
+-> SQL > select username,profile form dba_users where username='JOHN'
+    see what is in Default Profile 
+-> SQL > select * from DBA_PROFILES WHERE PROFILE='DEFAULT';
+    create a limited profile 
+-> SQL > CREATE PROFILE DW_PROFILE LIMIT SESSIONS_PER_USER 2 IDEL_TIME 5 CONNECT_TIME 10;
+    create a new user and assign profile at the same time 
+-> SQL > create user bb identified by bb PROFILE DW_PROFILE;
+    alter old user profile to newly created profile 
+-> SQL > alter user john profile DW_PROFILE;
+    see Profile for all users 
+-> SQL > select username,profile form dba_users;
+    see DW_PROFILE options 
+-> SQL > select * from DBA_PROFILES where profile='DW_PROFILE'
+    change Session per User to 4
+-> SQL > alter profile DW_PROFILE LIMIT SESSIONS_PER_USER 4;
+    check again
+-> SQL > select * from DBA_PROFILES where profile='DW_PROFILE'
+    change password parameters 
+-> SQL > ALTER PROFILE DW_PROFILE LIMIT 
+         PASSWORD_LIFE_TIME 180 
+         PASSWORD_GRACE_TIME 7 
+         FAIL_LOGIN_ATTEMPTS 10
+         PASSWORD_LOCK_TIME 1;
+    check again
+-> SQL > select * from DBA_PROFILES where profile='DW_PROFILE'

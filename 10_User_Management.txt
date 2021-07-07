@@ -45,3 +45,170 @@
     unlock user john 
 -> SQL > alter user john account unlock;
 
+***************** Previlage Management *****************************
+    Create table using John Account 
+-> SQL > sqlplus / as sysdba 
+-> SQL > conn john/john123 
+-> SQL > create table stud(sno number); ( insufficient privileges error )
+-> SQL > select * from session_privs; ( checking available privileges for john )
+    On Other Terminal with SYS session 
+    Grant table create privilege to John 
+-> SQL > grant create table to john;
+    Now, on other terminal create table again as john user 
+-> SQL > create table stud(sno number);
+-> SQL > insert into stud values (1); (  Insert 1 row  )
+-> SQL > commit; ( Commit Transaction )
+-> SQL > select * from stud; ( see all rows in stud table )
+    From john session grant tom 'create table' privilege 
+-> SQL > grant create table to tom; ( insufficient privileges error )
+    on DBA session 
+    grant create table to john with Admin Option 
+-> SQL > grant create table to john with admin option;
+    on John Session grant create table to tom 
+-> SQL > grant create table to tom;
+    Login as tom/tom123 
+-> SQL > conn tom/tom123 
+    Create a table as tom user 
+-> SQL > create table sales(sno number);
+-> SQL > insert into sales values (1);
+-> SQL > commit;
+-> SQL > select * from sales;
+    Sale table is create in tom schema;
+    can john see tom schema;
+    to test login as john/john123 and select * from sales;
+-> SQL > conn john/john123 
+-> SQL > select * from sales; ( not working )
+    from john user, to select all from sales, we have to use user.schema 
+-> SQL > select * from tom.sales; ( still not working, cause john doesn't have privilege to seee tom table )
+    To solve problem 
+    give select any (Object permission) to john from DBA session 
+-> SQL > grant select any table to john;
+    Now from john session execute select command again 
+> SQL > select * from tom.sales;
+    Check john's priviletes 
+-> SQL > select * from session_privs;
+    Check tom's privileges 
+-> SQL > conn tom/tom123;
+-> SQL > select * from session_privs;
+
+******************** Object Previlege *********************
+    Checking who is the user 
+-> SQL > show user 
+    Create Customer Table 
+-> SQL > create table customers (cno number);
+    Insert some rows 
+-> SQL > insert into customers values (1);
+-> SQL > insert into customers values (2);
+-> SQL > commit; 
+-> SQL > select * from customers;
+    Login as john in other Session 
+-> SQL > conn john/john123 
+    Try select * data from customers using john account 
+-> SQL > select * from sys.customers;
+    Error 
+    Grant select previlege for customer table to john 
+    sys Session 
+-> SQL > grant select on sys.customers to john; 
+    Using john session select customers again 
+-> SQL > select * from sys.customers;
+    Delete customer row 
+-> SQL > delete from sys.customers where cno=1;
+    Error (insufficient previletes)
+    Grant john for delete privilege to customers
+    Using Sys session
+-> SQL > grant delete on sys.customers to john;
+    Now as john session 
+-> SQL > delete from sys.customers where cno=1;
+-> SQL > commit;
+    Check john can grant select and delete previlete to tom 
+-> SQL > grant delete,select on sys.customers to tom;
+    Error (insufficient previletes)
+    using SYS session grant john delete,select privilege with grant option
+-> SQL > grant select on sys.customers to john with grant option;
+-> SQL > grant delete on sys.customers to john with grant option;
+    using John session grant select and delete on sys.customers to tom
+-> SQL > grant delete,select on sys.customers to tom;
+    login as tom and check it out 
+-> SQL > conn tom/tom123 
+-> SQL > select * from sys.customers;
+-> SQL > delete from sys.customers where cno=2;
+
+********************** Revoking System Privileges ************************** 
+    conn as john 
+-> SQL > conn john/john123 
+    Check john privileges 
+-> SQL > select * from session_privs;
+    using SYS session 
+-> SQL > revoke create table from john;
+    Check john privileges
+-> SQL > select * from session_privs;
+    previously john gave create table privileges to tom
+    now as john loose create table privileges check how about tom 
+-> SQL > conn tom/tom123;
+-> SQL > select * from session_privs;
+    though create table privileges is revoked from jhon but not for tom 
+
+********************** Revoking Object Privileges ************************** 
+    Previously sys user create customers table and 
+    gave jhon select,delete previege with grant option;
+    now revoke select,delete form john 
+    as Sys session 
+-> SQL > revoke select,delete on sys.customers from john;
+    on john session 
+-> conn john/john123 
+-> select * from sys.customers;
+    Error 
+    Previously john gave select,delete permission to tom 
+    now check tom stall can select or delete from sys.customers 
+-> SQL > conn tom/tom123;
+-> select * from sys.customers;
+
+*************************** Role Managment *******************************
+    Create dw user with password dw 
+-> SQL > create user dw identified by dw;
+    Grant create session to dw;
+-> SQL > grant create session dw;
+    define limit amount of space for dw
+-> SQL > alter user dw quota 10m on users; 
+    Give create table privilege to dw 
+-> SQL > grant create table to dw;
+    Create user peter 
+-> SQL > create user peter identified by peter;
+    Grant create session to peter
+-> SQL > grant create session to peter;
+    Assign quota for peter 
+-> SQL > alter user peter quota 10m on users;
+    Login as dw in other terminal ( new Session )
+-> SQL > conn dw/dw;
+    Create 3 table under dw; 
+-> SQL > create table sales (sno number);
+-> SQL > create table sales_history (sno number);
+-> SQL > create table products (pno number);
+    Clear Screen 
+    As SYS session
+-> SQL > clear screen
+    Create Manager_ROLE 
+-> SQL > create role manager_role;
+    assign insert,update, delete on dw.sales_history to manager_role;
+-> SQL > grant insert,update, delete on dw.sales_history to manager_role;
+    assign create table previletes to manager_role;
+-> SQL > grant create table to manager_role;
+    grant manager_role to perter 
+-> SQL > grant manager_role to peter;
+    create operator_role;
+-> SQL > create role operator_role;
+    grant insert, update on dw.sales to operator_role;
+-> SQL > grant insert, update on dw.sales to operator_role;
+    grant insert, update on dw.products to operator_role;
+-> SQL > grant insert, update on dw.products to operator_role;
+    assign operator_role to manager_role;
+-> SQL > grant operator_role to manager_role;
+    assign operator_role to jhon;
+-> SQL > grant operator_role to john;
+    assign operator_role to tom;
+-> SQL > grant operator_role to tom;
+    connect as tom/tom ( tom Session )
+-> SQL > conn tom/tom 
+    test insert to product able 
+-> SQL > insert into dw.products values (1);
+
